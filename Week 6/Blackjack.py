@@ -27,8 +27,8 @@ DEALER_TEXT_POS = (DEALER_HAND_POS[0], DEALER_HAND_POS[1] - 8)
 PLAYER_TEXT_POS = (PLAYER_HAND_POS[0], PLAYER_HAND_POS[1] - 8)
 SCORE_TEXT_POS = ((BOARD_SIZE[0] / 10) * 8, BOARD_SIZE[1] / 10)
 TITLE_TEXT_POS = ((BOARD_SIZE[0] / 10) * 3, BOARD_SIZE[1] / 10)
-ACTION_TEXT_POS = ((BOARD_SIZE[0] / 10) * 3, (BOARD_SIZE[1] / 10) * 6)
-OUTCOME_TEXT_POS = (DEALER_HAND_POS[0] + 200, DEALER_HAND_POS[1] - 10)
+ACTION_TEXT_POS = (PLAYER_HAND_POS[0] + 200, PLAYER_HAND_POS[1] - 50)
+OUTCOME_TEXT_POS = (DEALER_HAND_POS[0] + 200, DEALER_HAND_POS[1] - 50)
 
 # initialize some useful global variables
 in_play = False
@@ -168,13 +168,14 @@ def deal():
 
 
 def hit():
-    global player_hand, deck, outcome, in_play, score
+    global player_hand, deck, outcome, in_play, score, action
 
     if in_play:
         if player_hand.get_value() <= 21:
             player_hand.add_card(deck.deal_card())
             if player_hand.get_value() > 21:
-                outcome = "You have busted"
+                outcome = "You went bust and lose"
+                action = "New deal?"
                 score -= 1
                 in_play = False
 
