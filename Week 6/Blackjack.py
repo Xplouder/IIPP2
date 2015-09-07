@@ -161,7 +161,7 @@ def deal():
     player_hand = Hand()
     player_hand.add_card(deck.deal_card())
     player_hand.add_card(deck.deal_card())
-
+    # Other
     outcome = ""
     action = "Hit or Stand?"
     in_play = True
