@@ -58,6 +58,10 @@ class Card:
         canvas.draw_image(card_images, card_loc, CARD_SIZE, [pos[0] + CARD_CENTER[0], pos[1] + CARD_CENTER[1]],
                           CARD_SIZE)
 
+    def draw_back(self, canvas, pos):
+        canvas.draw_image(card_back, CARD_BACK_CENTER, CARD_BACK_SIZE,
+                          [pos[0] + CARD_BACK_CENTER[0], pos[1] + CARD_BACK_CENTER[1]], CARD_BACK_SIZE)
+
 
 # define hand class
 class Hand:
@@ -93,6 +97,17 @@ class Hand:
         for card in self.hand:
             card.draw(canvas, (pos[0] + offset, pos[1]))
             offset += 5 + CARD_SIZE[0]
+
+    def draw_hiding_first(self, canvas, pos):
+        offset = 0
+        i = 0
+        for card in self.hand:
+            if i == len(self.hand) - 1:
+                card.draw(canvas, (pos[0] + offset, pos[1]))
+            else:
+                card.draw_back(canvas, (pos[0] + offset, pos[1]))
+            offset += 5 + CARD_SIZE[0]
+            i += 1
 
 
 # define deck class
@@ -138,21 +153,19 @@ def deal():
 
 
 def hit():
-    global player_hand, deck, outcome, in_play
+    global player_hand, deck, outcome, in_play, score
 
-    if player_hand.get_value() <= 21:
-        player_hand.add_card(deck.deal_card())
-        if player_hand.get_value() > 21:
-            outcome = "You have busted"
-            in_play = False
-            # TODO -> update  score
+    if in_play:
+        if player_hand.get_value() <= 21:
+            player_hand.add_card(deck.deal_card())
+            if player_hand.get_value() > 21:
+                outcome = "You have busted"
+                score -= 1
+                in_play = False
 
 
 def stand():
-    global player_hand, dealer_hand, deck, outcome, in_play
-    # if hand is in play, repeatedly hit dealer until his hand has value 17 or more
-
-    # assign a message to outcome, update in_play and score
+    global player_hand, dealer_hand, deck, outcome, in_play, score
 
     if not in_play:
         outcome = "You have busted"
@@ -162,23 +175,27 @@ def stand():
 
         if dealer_hand.get_value() > 21:
             outcome = "You Won!"
-            # TODO -> update  score
+            score += 1
         else:
             if dealer_hand.get_value() >= player_hand.get_value():
                 outcome = "You Lost"
-                # TODO -> update  score
+                score -= 1
             else:
                 outcome = "You Won!"
-                # TODO -> update  score
+                score += 1
     in_play = False
 
 
 # draw handler
 def draw(canvas):
-    dealer_hand.draw(canvas, (BOARD_SIZE[0] / 6, CARD_SIZE[1]))
+    if in_play:
+        dealer_hand.draw_hiding_first(canvas, (BOARD_SIZE[0] / 6, CARD_SIZE[1]))
+    else:
+        dealer_hand.draw(canvas, (BOARD_SIZE[0] / 6, CARD_SIZE[1]))
     player_hand.draw(canvas, (BOARD_SIZE[0] / 6, BOARD_SIZE[1] - (CARD_SIZE[1] * 2)))
     canvas.draw_text(outcome, (BOARD_SIZE[0] / 3, BOARD_SIZE[1] / 2), 30, 'White')
-    canvas.draw_text("Blackjack", (BOARD_SIZE[0] / 3, BOARD_SIZE[1] / 10), 40, 'White')
+    canvas.draw_text("Blackjack", (BOARD_SIZE[0] / 6, BOARD_SIZE[1] / 10), 40, 'White')
+    canvas.draw_text("Score: " + str(score), ((BOARD_SIZE[0] / 10) * 8, BOARD_SIZE[1] / 10), 25, 'White')
 
 
 # initialization frame
