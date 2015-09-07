@@ -20,9 +20,20 @@ CARD_BACK_SIZE = (72, 96)
 CARD_BACK_CENTER = (36, 48)
 card_back = simplegui.load_image("http://storage.googleapis.com/codeskulptor-assets/card_jfitz_back.png")
 
+# global position draw variables
+DEALER_HAND_POS = (BOARD_SIZE[0] / 6, (BOARD_SIZE[1] / 10) * 3)
+PLAYER_HAND_POS = (BOARD_SIZE[0] / 6, (BOARD_SIZE[1] / 10) * 7)
+DEALER_TEXT_POS = (DEALER_HAND_POS[0], DEALER_HAND_POS[1] - 8)
+PLAYER_TEXT_POS = (PLAYER_HAND_POS[0], PLAYER_HAND_POS[1] - 8)
+SCORE_TEXT_POS = ((BOARD_SIZE[0] / 10) * 8, BOARD_SIZE[1] / 10)
+TITLE_TEXT_POS = ((BOARD_SIZE[0] / 10) * 3, BOARD_SIZE[1] / 10)
+ACTION_TEXT_POS = ((BOARD_SIZE[0] / 10) * 3, (BOARD_SIZE[1] / 10) * 6)
+OUTCOME_TEXT_POS = (DEALER_HAND_POS[0] + 200, DEALER_HAND_POS[1] - 10)
+
 # initialize some useful global variables
 in_play = False
 outcome = ""
+action = ""
 score = 0
 
 # define globals for cards
@@ -133,7 +144,12 @@ class Deck:
 
 # define event handlers for buttons
 def deal():
-    global outcome, in_play, deck, dealer_hand, player_hand
+    global outcome, in_play, deck, dealer_hand, player_hand, score, action
+
+    if in_play:
+        outcome = "You lost this round!"
+        score -= 1
+
     # Deck
     deck = Deck()
     deck.shuffle()
@@ -141,14 +157,13 @@ def deal():
     dealer_hand = Hand()
     dealer_hand.add_card(deck.deal_card())
     dealer_hand.add_card(deck.deal_card())
-    print "Dealer's " + str(dealer_hand)
     # Player
     player_hand = Hand()
     player_hand.add_card(deck.deal_card())
     player_hand.add_card(deck.deal_card())
-    print "Player's " + str(player_hand)
 
-    outcome = "Your Turn :)"
+    outcome = ""
+    action = "Hit or Stand?"
     in_play = True
 
 
@@ -189,13 +204,19 @@ def stand():
 # draw handler
 def draw(canvas):
     if in_play:
-        dealer_hand.draw_hiding_first(canvas, (BOARD_SIZE[0] / 6, CARD_SIZE[1]))
+        dealer_hand.draw_hiding_first(canvas, DEALER_HAND_POS)
     else:
-        dealer_hand.draw(canvas, (BOARD_SIZE[0] / 6, CARD_SIZE[1]))
-    player_hand.draw(canvas, (BOARD_SIZE[0] / 6, BOARD_SIZE[1] - (CARD_SIZE[1] * 2)))
-    canvas.draw_text(outcome, (BOARD_SIZE[0] / 3, BOARD_SIZE[1] / 2), 30, 'White')
-    canvas.draw_text("Blackjack", (BOARD_SIZE[0] / 6, BOARD_SIZE[1] / 10), 40, 'White')
-    canvas.draw_text("Score: " + str(score), ((BOARD_SIZE[0] / 10) * 8, BOARD_SIZE[1] / 10), 25, 'White')
+        dealer_hand.draw(canvas, DEALER_HAND_POS)
+    player_hand.draw(canvas, PLAYER_HAND_POS)
+
+    # Static Text
+    canvas.draw_text("Blackjack", TITLE_TEXT_POS, 50, 'red')
+    canvas.draw_text("Dealer", DEALER_TEXT_POS, 25, 'White')
+    canvas.draw_text("Player", PLAYER_TEXT_POS, 25, 'White')
+    # Dynamic Text
+    canvas.draw_text(outcome, OUTCOME_TEXT_POS, 30, 'Black')
+    canvas.draw_text(action, ACTION_TEXT_POS, 30, 'Black')
+    canvas.draw_text("Score: " + str(score), SCORE_TEXT_POS, 25, 'White')
 
 
 # initialization frame
