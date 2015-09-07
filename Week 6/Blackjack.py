@@ -219,7 +219,6 @@ def draw(canvas):
     canvas.draw_text(action, ACTION_TEXT_POS, 30, 'Black')
     canvas.draw_text("Score: " + str(score), SCORE_TEXT_POS, 25, 'White')
 
-
 # initialization frame
 frame = simplegui.create_frame("Blackjack", BOARD_SIZE[0], BOARD_SIZE[1])
 frame.set_canvas_background("Green")
@@ -229,7 +228,6 @@ frame.add_button("Deal", deal, 200)
 frame.add_button("Hit", hit, 200)
 frame.add_button("Stand", stand, 200)
 frame.set_draw_handler(draw)
-
 
 # get things rolling
 deal()
