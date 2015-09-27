@@ -7,6 +7,8 @@ except ImportError:
 import math
 import random
 
+__author__ = 'João Silva'
+
 # globals for user interface
 WIDTH = 800
 HEIGHT = 600
@@ -76,7 +78,11 @@ asteroid_image = simplegui.load_image(
 # animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
 explosion_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
 explosion_image = simplegui.load_image(
-    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_alpha.png")
+    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_orange.png")
+
+explosion_ship_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
+explosion_ship_image = simplegui.load_image(
+    "http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_blue2.png")
 
 # sound assets purchased from sounddogs.com, please do not redistribute
 # .ogg versions of sounds are also available, just replace .mp3 by .ogg
@@ -188,8 +194,12 @@ class Sprite:
             sound.play()
 
     def draw(self, canvas):
-        canvas.draw_image(self.image, self.image_center, self.image_size,
-                          self.pos, self.image_size, self.angle)
+        if self.animated:
+            center = self.image_center[0] + self.image_size[0] * self.age
+            canvas.draw_image(self.image, [center, self.image_center[0]], self.image_size, self.pos, self.image_size,
+                              self.angle)
+        else:
+            canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
 
     def update(self):
         # update angle
@@ -286,6 +296,7 @@ def draw(canvas):
 
     process_sprite_group(missile_group, canvas)
     process_sprite_group(rock_group, canvas)
+    process_sprite_group(explosion_group, canvas)
 
     # Check Ship collisions
     if group_collide(rock_group, my_ship):
@@ -331,8 +342,17 @@ def process_sprite_group(group, canvas):
 def group_collide(group, other_object):
     for elem in list(group):
         if elem.collide(other_object):
-            group.remove(elem)
-            return True
+            if isinstance(other_object, Ship):
+                new_explosion = Sprite(other_object.pos, [0, 0], 0, 0, explosion_ship_image, explosion_ship_info,
+                                       explosion_sound)
+                explosion_group.add(new_explosion)
+                group.remove(elem)
+                return True
+            elif isinstance(other_object, Sprite):
+                new_explosion = Sprite(elem.pos, [0, 0], 0, 0, explosion_image, explosion_info, explosion_sound)
+                explosion_group.add(new_explosion)
+                group.remove(elem)
+                return True
     return False
 
 
@@ -352,8 +372,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 rock_group = set([])
 missile_group = set([])
-# a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1, 1], 0, 0, missile_image, missile_info, missile_sound)
-
+explosion_group = set([])
 
 # register handlers
 frame.set_keyup_handler(keyup)
